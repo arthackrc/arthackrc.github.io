@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cerdas Cermat UNITOMO 2025</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .option-btn { transition: all 0.2s; }
+        .option-btn:hover { background-color: #f3f4f6; }
+        .selected { background-color: #3b82f6 !important; color: white; border-color: #2563eb; }
+        .correct { background-color: #10b981 !important; color: white; }
+        .wrong { background-color: #ef4444 !important; color: white; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans">
+    <div id="app" class="max-w-3xl mx-auto p-4 md:p-8">
+        <!-- Header -->
+        <header class="text-center mb-8 bg-white p-6 rounded-2xl shadow-sm">
+            <h1 class="text-2xl font-bold text-blue-800">Cerdas Cermat UNITOMO 2025</h1>
+            <p class="text-gray-600 mt-2">Uji kemampuan Bahasa Jepang Anda!</p>
+            <div id="score-display" class="hidden mt-4 p-4 bg-blue-50 rounded-xl">
+                <span class="text-lg font-semibold text-blue-700">Skor Anda: <span id="final-score">0</span> / 65</span>
+            </div>
+        </header>
+
+        <!-- Quiz Container -->
+        <div id="quiz-container" class="space-y-6">
+            <!-- Questions will be injected here -->
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-10 flex justify-center pb-12">
+            <button id="submit-btn" onclick="checkAnswers()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-10 rounded-full shadow-lg transition-transform active:scale-95">
+                Kirim Jawaban
+            </button>
+            <button id="restart-btn" onclick="location.reload()" class="hidden bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-10 rounded-full shadow-lg transition-transform active:scale-95">
+                Ulangi Kuis
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            { q: "1. 車 ______ スラバヤ へ いきます。", type: "mc", options: ["A. に", "B. の", "C. で", "D. が"], correct: 2 },
+            { q: "2. これら だれの かばん _____？", type: "mc", options: ["A. です", "B. ます", "C. ですか", "D. あれは"], correct: 2 },
+            { q: "3. ほけんしつ_____ どこ ですか？", type: "mc", options: ["A. も", "B. から", "C. は", "D. を"], correct: 2 },
+            { q: "4. 兄は コーヒー _____ 飲んでます。", type: "mc", options: ["A. を", "B. は", "C. で", "D. が"], correct: 0 },
+            { q: "5. 父は 明日 バリ______ 行きます。", type: "mc", options: ["A. は", "B. で", "C. へ", "D. の"], correct: 2 },
+            { q: "6. いもうとは おかし______ 食べています。", type: "mc", options: ["A. の", "B. が", "C. を", "D. で"], correct: 2 },
+            { q: "7. 私は 日本語の べんきょう _____ 大好きです。", type: "mc", options: ["A. は", "B. が", "C. を", "D. の"], correct: 1 },
+            { q: "8. 田中さんは 明日 日本_____かえります。", type: "mc", options: ["A. へ", "B. は", "C. も", "D. を"], correct: 0 },
+            { q: "9. テレビ____ つけて ください、", type: "mc", options: ["A. は", "B. を", "C. が", "D. へ"], correct: 1 },
+            { q: "10. きのう ともだち_____ 映画を 見に行きました。", type: "mc", options: ["A. に", "B. で", "C. と", "D. に"], correct: 2 },
+            { q: "11. 朝 はを みがいて、ごはん____食べて、学校へいきます。", type: "mc", options: ["A. は", "B. を", "C. が", "D. へ"], correct: 1 },
+            { q: "12. きょうしつ_____ だれも いません、", type: "mc", options: ["A. が", "B. を", "C. に", "D. も"], correct: 2 },
+            { q: "13. しょくどうで ごはんを _________。", type: "mc", options: ["A. 見ます", "B. 飲みます", "C. 寝ます", "D. 食べます"], correct: 3 },
+            { q: "14. モスクで _________をします。", type: "mc", options: ["A. あそび", "B. おいのり", "C. べんきょう", "D. はなし"], correct: 1 },
+            { q: "15. 学校は 朝 ろくじにじゅっぷん に 入ります。", type: "mc", options: ["A. 六時二分", "B. 六時二十分", "C. 七時二分", "D. 七時二十分"], correct: 1 },
+            { q: "16. 母は りょうりが じょうずです。", type: "mc", options: ["A. 下手", "B. 天気", "C. 上手", "D. 東京"], correct: 2 },
+            { q: "17. からい _______ は 苦手です。", type: "mc", options: ["A. 飲みもの", "B. あつい", "C. つめたい", "D. 食べもの"], correct: 3 },
+            { q: "18. 明日の 天気は 大雨です。傘を もって 行きます。", type: "mc", options: ["A. だいあめ", "B. たいふう", "C. おおあめ", "D. つなみ"], correct: 2 },
+            { q: "19. すみません、ノートを ________、 ごめんなさい、", type: "mc", options: ["A. かくしました", "B. あげました", "C. おきました", "D. わすれました"], correct: 3 },
+            { q: "20. 先生は ________に います。(ruang guru)", type: "mc", options: ["A. しょくいんしつ", "B. としょかん", "C. しょくどう", "D. こうてい"], correct: 0 },
+            { q: "21. わたしは 八月 ここのか ともだちと ブロモ山に 行きます。", type: "mc", options: ["A. 七日", "B. 八日", "C. 九日", "D. 十日"], correct: 2 },
+            { q: "22. えんぴつ で __________ ください、", type: "mc", options: ["A. よんで", "B. たべて", "C. かいて", "D. みて"], correct: 2 },
+            { q: "23. あついですね、エアコンを _________か？", type: "mc", options: ["A. けしましょう", "B. つけましょう", "C. 見ましょう", "D. 行きましょう"], correct: 1 },
+            { q: "24. A : すみません、トイレは ______ですか？ B : トイレは この ろうかを まっすぐ 左です。", type: "mc", options: ["A. あれ", "B. どれ", "C. どこ", "D. それ"], correct: 2 },
+            { q: "25. A : 日曜日 デパートへ ______か？ B : いいですね、行きましょう。", type: "mc", options: ["A. 行く", "B. 行きません", "C. 行かない", "D. 行きたくない"], correct: 1 },
+            { q: "26. A : この とけい _______？ B : 六万八千円です。", type: "mc", options: ["A. どれですか", "B. あれですか", "C. いくらですか", "D. たかいですか"], correct: 2 },
+            { q: "27. ニナ先生は ______ 先生です。(Baik)", type: "mc", options: ["A. こわい", "B. やさしい", "C. きびしい", "D. 楽しい"], correct: 1 },
+            { q: "28. あした ほんや で あたらしい じしょを 買います。", type: "mc", options: ["A. 本山", "B. 本気", "C. 本屋", "D. 本当"], correct: 2 },
+            { q: "29. おべんとうを 食べる前に てを あらいます、", type: "mc", options: ["A. 口", "B. 足", "C. 目", "D. 手"], correct: 3 },
+            { q: "30. 星が ________ですね。(indah)", type: "mc", options: ["A. きたない", "B. きれい", "C. ふつう", "D. ない"], correct: 1 },
+            { q: "31. こくばんを _________ ください、(menghapus)", type: "mc", options: ["A. 見て", "B. 聞いて", "C. けして", "D. よんで"], correct: 2 },
+            { q: "32. きょうかしょを ________ ください、(membuka)", type: "mc", options: ["A. あけて", "B. しめて", "C. おいて", "D. 書いて"], correct: 0 },
+            { q: "33. かわださんは 日本語の 先生です。", type: "mc", options: ["A. 川山", "B. 川下", "C. 川田", "D. 川上"], correct: 2 },
+            { q: "34. アニさん は 何人 かぞくですか？ (Berdasarkan teks)", type: "mc", options: ["A. 五人", "B. 四人", "C. 六人", "D. 七人"], correct: 1 },
+            { q: "35. アニさんの 好きな かもくは なんですか？", type: "mc", options: ["A. 空手", "B. 高校", "C. 英語", "D. 年生"], correct: 2 },
+            { q: "36. アニさんは 高校 何年生ですか？", type: "mc", options: ["A. 高校", "B. 一年生", "C. 三年生", "D. 二年生"], correct: 2 },
+            { q: "37. アニさんは 何時に おきますか？", type: "mc", options: ["A. 4時", "B. 6時", "C. 5時", "D. 7時"], correct: 2 },
+            { q: "38. なつやすみ は 海へ 行きたいです。", type: "mc", options: ["A. 春休み", "B. 夏休み", "C. 冬休み", "D. 秋休み"], correct: 1 },
+            { q: "39. 電車に のるのは はじめてです。", type: "mc", options: ["A. 初めて", "B. 花めて", "C. 入めて", "D. 会めて"], correct: 0 },
+            { q: "40. しゅみは はなのえを 書くことです。", type: "mc", options: ["A. 草", "B. 竹", "C. 町", "D. 花"], correct: 3 },
+            { q: "41. Susun kalimat: は / の / です / わたし / ノート / それ", type: "arrange", correct: "それはわたしのノートです" },
+            { q: "42. Susun kalimat: はは / 先生 / 学校 / です / は / の", type: "arrange", correct: "ははは学校の先生です" },
+            { q: "43. Susun kalimat: いません / は / に / 先生 / きょうしつ", type: "arrange", correct: "先生はきょうしつにいません" },
+            { q: "44. Susun kalimat: は / へ / あした / かえります / 田中さん / 日本", type: "arrange", correct: "田中さんはあした日本へかえります" },
+            { q: "45. Susun kalimat: ありません / くつ / これ / アユさん / は / の / では", type: "arrange", correct: "これはアユさんのくつではありません" },
+            { q: "46. Kanji: 花火 (Hanabi)", type: "bool", correct: true },
+            { q: "47. Kanji: 山田さん (Yamada san)", type: "bool", correct: true },
+            { q: "48. Kanji: 水色 (Mizu iro)", type: "bool", correct: true },
+            { q: "49. Kanji: 桜の木 (Sakura no hi)", type: "bool", correct: false }, // Sakura no ki
+            { q: "50. Kanji: 来週 (Raishu)", type: "bool", correct: true },
+            { q: "51. Kanji: 本 (Nooto)", type: "bool", correct: false }, // Hon
+            { q: "52. Kanji: 天気 (Tenki)", type: "bool", correct: true },
+            { q: "53. Kanji: 青空 (Aozora)", type: "bool", correct: true },
+            { q: "54. Kanji: 月見 (Tsukimi)", type: "bool", correct: true },
+            { q: "55. Kanji: 山下さん (Yamashita san)", type: "bool", correct: true },
+            { q: "56. Kanji: 大きい (Chiisai)", type: "bool", correct: false }, // Ookii
+            { q: "57. Kanji: 火山 (Kazan)", type: "bool", correct: true },
+            { q: "58. Kanji: 音楽 (Ongaku)", type: "bool", correct: true },
+            { q: "59. Kanji: 右手 (Hidari te)", type: "bool", correct: false }, // Migi te
+            { q: "60. Kanji: 元気 (Tenki)", type: "bool", correct: false }, // Genki
+            { q: "61. Kanji: 五円玉 (Goendama)", type: "bool", correct: true },
+            { q: "62. Kanji: 王子 (Ouko)", type: "bool", correct: false }, // Ouji
+            { q: "63. Kanji: 男性 (Dansei)", type: "bool", correct: true },
+            { q: "64. Kanji: 電車 (Densha)", type: "bool", correct: true },
+            { q: "65. Kanji: 女子 (Joshi)", type: "bool", correct: true }
+        ];
+
+        const quizContainer = document.getElementById('quiz-container');
+        const userAnswers = Array(questions.length).fill(null);
+
+        function initQuiz() {
+            questions.forEach((question, index) => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-6 rounded-2xl shadow-sm border border-gray-100";
+                
+                let content = `<h3 class="text-lg font-medium text-gray-800 mb-4">${question.q}</h3>`;
+                
+                if (question.type === "mc") {
+                    content += `<div class="grid grid-cols-1 md:grid-cols-2 gap-3">`;
+                    question.options.forEach((opt, optIdx) => {
+                        content += `
+                            <button onclick="selectOption(${index}, ${optIdx})" id="q${index}-o${optIdx}" class="option-btn text-left p-3 border rounded-xl border-gray-200 hover:border-blue-400">
+                                ${opt}
+                            </button>
+                        `;
+                    });
+                    content += `</div>`;
+                } else if (question.type === "arrange") {
+                    content += `
+                        <input type="text" id="q${index}-input" placeholder="Tulis susunan kalimat di sini (tanpa spasi)" 
+                        class="w-full p-3 border rounded-xl border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        onchange="recordTextAnswer(${index}, this.value)">
+                    `;
+                } else if (question.type === "bool") {
+                    content += `
+                        <div class="flex gap-4">
+                            <button onclick="selectOption(${index}, true)" id="q${index}-true" class="option-btn flex-1 p-3 border rounded-xl border-gray-200 hover:border-green-400">
+                                Benar (まる ️⭕️)
+                            </button>
+                            <button onclick="selectOption(${index}, false)" id="q${index}-false" class="option-btn flex-1 p-3 border rounded-xl border-gray-200 hover:border-red-400">
+                                Salah (ばつ❌)
+                            </button>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = content;
+                quizContainer.appendChild(card);
+            });
+        }
+
+        window.selectOption = function(qIdx, val) {
+            const question = questions[qIdx];
+            userAnswers[qIdx] = val;
+
+            // Clear previous selections
+            if (question.type === "mc") {
+                question.options.forEach((_, i) => {
+                    document.getElementById(`q${qIdx}-o${i}`).classList.remove('selected');
+                });
+                document.getElementById(`q${qIdx}-o${val}`).classList.add('selected');
+            } else if (question.type === "bool") {
+                document.getElementById(`q${qIdx}-true`).classList.remove('selected');
+                document.getElementById(`q${qIdx}-false`).classList.remove('selected');
+                document.getElementById(`q${qIdx}-${val}`).classList.add('selected');
+            }
+        };
+
+        window.recordTextAnswer = function(qIdx, val) {
+            userAnswers[qIdx] = val.trim().replace(/\s/g, '');
+        };
+
+        window.checkAnswers = function() {
+            let score = 0;
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach((inp, idx) => {
+                // Trigger change to capture any text not yet blurred
+                inp.dispatchEvent(new Event('change'));
+            });
+
+            questions.forEach((question, index) => {
+                const answer = userAnswers[index];
+                let isCorrect = false;
+
+                if (question.type === "arrange") {
+                    isCorrect = (answer === question.correct);
+                    const inputEl = document.getElementById(`q${index}-input`);
+                    inputEl.classList.add(isCorrect ? 'border-green-500' : 'border-red-500');
+                    if (!isCorrect) {
+                        const feedback = document.createElement('p');
+                        feedback.className = "text-sm text-red-600 mt-2";
+                        feedback.innerText = `Koreksi: ${question.correct}`;
+                        inputEl.parentNode.appendChild(feedback);
+                    }
+                } else {
+                    isCorrect = (answer === question.correct);
+                    // Visual feedback for MCQ and Bool
+                    if (question.type === "mc") {
+                        if (answer !== null) document.getElementById(`q${index}-o${answer}`).classList.add(isCorrect ? 'correct' : 'wrong');
+                        document.getElementById(`q${index}-o${question.correct}`).classList.add('correct');
+                    } else if (question.type === "bool") {
+                        if (answer !== null) document.getElementById(`q${index}-${answer}`).classList.add(isCorrect ? 'correct' : 'wrong');
+                        document.getElementById(`q${index}-${question.correct}`).classList.add('correct');
+                    }
+                }
+
+                if (isCorrect) score++;
+            });
+
+            // Display Score
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('score-display').classList.remove('hidden');
+            document.getElementById('submit-btn').classList.add('hidden');
+            document.getElementById('restart-btn').classList.remove('hidden');
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        window.onload = initQuiz;
+    </script>
+</body>
+</html>
